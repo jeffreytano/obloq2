@@ -417,142 +417,437 @@ namespace Obloq_http {
 
          basic.showIcon(IconNames.Yes)
        
-
    }
-    function Obloq_serial_recevice(): void {
-
-        let Obloq_message_str = serial.readString()
-        let size = Obloq_message_str.length
-        let item = Obloq_message_str
-
-        if (item.indexOf("|4|1|1|1|", 0) != -1) {
-            OBLOQ_ANSWER_CMD = "MqttConneted"
-            OBLOQ_ANSWER_CONTENT = OBLOQ_STR_TYPE_IS_NONE
-            return
-        } else if (item.indexOf("|4|1|1|2|", 0) != -1) {
-            OBLOQ_ANSWER_CMD = "MqttConnectFailure"
-            OBLOQ_ANSWER_CONTENT = item.substr(9, size - 2 - 9)
-            return
-        } else if (item.indexOf("|4|1|2|1|", 0) != -1) {
-            OBLOQ_ANSWER_CMD = "SubOk"
-            OBLOQ_ANSWER_CONTENT = OBLOQ_STR_TYPE_IS_NONE
-            return
-        } else if (item.indexOf("|4|1|2|2|1|", 0) != -1) {
-            OBLOQ_ANSWER_CMD = "SubCeiling"
-            OBLOQ_ANSWER_CONTENT = OBLOQ_STR_TYPE_IS_NONE
-            return
-        } else if (item.indexOf("|4|1|2|2|2|", 0) != -1) {
-            OBLOQ_ANSWER_CMD = "SubFailure"
-            OBLOQ_ANSWER_CONTENT = OBLOQ_STR_TYPE_IS_NONE
-            return
-        } else if (item.indexOf("|4|1|3|1|", 0) != -1) {
-            OBLOQ_ANSWER_CMD = "PulishOk"
-            OBLOQ_ANSWER_CONTENT = OBLOQ_STR_TYPE_IS_NONE
-            return
-        } else if (item.indexOf("|4|1|3|2|", 0) != -1) {
-            OBLOQ_ANSWER_CMD = "PulishFailure"
-            OBLOQ_ANSWER_CONTENT = OBLOQ_STR_TYPE_IS_NONE
-            OBLOQ_WRONG_TYPE = "mqtt pulish failure"
-            return
-        } else if (item.indexOf("|4|1|4|1|", 0) != -1) {
-            OBLOQ_ANSWER_CMD = "MqttDisconnected"
-            OBLOQ_ANSWER_CONTENT = OBLOQ_STR_TYPE_IS_NONE
-            return
-        } else if (item.indexOf("|4|1|4|2|", 0) != -1) {
-            OBLOQ_ANSWER_CMD = "MqttDisconnectFailure"
-            OBLOQ_ANSWER_CONTENT = OBLOQ_STR_TYPE_IS_NONE
-            return
-        } else if (item.indexOf("|4|1|5|") != -1) {//|4|1|5|topic|message|
-            let str = item.substr(7, size - 2 - 7)
-            let num = str.indexOf("|")
-            OBLOQ_ANSWER_CMD = str.substr(0, num)
-            OBLOQ_ANSWER_CONTENT = str.substr(num + 1, str.length - OBLOQ_ANSWER_CMD.length - 1)
-            switch (OBLOQ_ANSWER_CMD) {
-                case OBLOQ_MQTT_TOPIC[0][0]: { if (OBLOQ_MQTT_CB[0] != null) obloqforevers(OBLOQ_MQTT_CB[0]); } break;
-                case OBLOQ_MQTT_TOPIC[1][0]: { if (OBLOQ_MQTT_CB[1] != null) obloqforevers(OBLOQ_MQTT_CB[1]); } break;
-                case OBLOQ_MQTT_TOPIC[2][0]: { if (OBLOQ_MQTT_CB[2] != null) obloqforevers(OBLOQ_MQTT_CB[2]); } break;
-                case OBLOQ_MQTT_TOPIC[3][0]: { if (OBLOQ_MQTT_CB[3] != null) obloqforevers(OBLOQ_MQTT_CB[3]); } break;
-                case OBLOQ_MQTT_TOPIC[4][0]: { if (OBLOQ_MQTT_CB[4] != null) obloqforevers(OBLOQ_MQTT_CB[4]); } break;
-            }
-            return
-        } else if (item.indexOf("|4|1|6|1|", 0) != -1) {
-            OBLOQ_ANSWER_CMD = "UnSubOk"
-            OBLOQ_ANSWER_CONTENT = OBLOQ_STR_TYPE_IS_NONE
-            return
-        } else if (item.indexOf("|4|1|6|2|1|", 0) != -1) {
-            OBLOQ_ANSWER_CMD = "UnSubFailure"
-            OBLOQ_ANSWER_CONTENT = OBLOQ_STR_TYPE_IS_NONE
-            return
-        } else if (item.indexOf("|4|1|6|2|2|", 0) != -1) {
-            OBLOQ_ANSWER_CMD = "UnSubFailure"
-            OBLOQ_ANSWER_CONTENT = OBLOQ_STR_TYPE_IS_NONE
-            return
-        } else if (item.indexOf("|1|1|", 0) != -1) {
-            OBLOQ_ANSWER_CMD = "PingOk"
-            OBLOQ_ANSWER_CONTENT = OBLOQ_STR_TYPE_IS_NONE
-            return
-        } else if (item.indexOf("|1|2|", 0) != -1) {
-            OBLOQ_ANSWER_CMD = "GetVersion"
-            OBLOQ_ANSWER_CONTENT = item.substr(5, size - 2 - 5)//version
-            return
-        } else if (item.indexOf("|1|3|", 0) != -1) {
-            if (OBLOQ_MQTT_INIT) {
-                OBLOQ_ANSWER_CMD = "Heartbeat"
-                OBLOQ_ANSWER_CONTENT = "OK"
-            }
-            return
-        } else if (item.indexOf("|2|1|", 0) != -1) {
-            OBLOQ_ANSWER_CMD = "WifiDisconnect"
-            OBLOQ_ANSWER_CONTENT = OBLOQ_STR_TYPE_IS_NONE
-            if (OBLOQ_MQTT_INIT || OBLOQ_HTTP_INIT || OBLOQ_WIFI_CONNECTED) {
-                OBLOQ_WRONG_TYPE = "wifi disconnect"
-            }
-            return
-        } else if (item.indexOf("|2|2|", 0) != -1) {
-            OBLOQ_ANSWER_CMD = "WifiConnecting"
-            OBLOQ_ANSWER_CONTENT = OBLOQ_STR_TYPE_IS_NONE
-            return
-        } else if (item.indexOf("|2|3|", 0) != -1) {
-            OBLOQ_ANSWER_CMD = "WifiConnected"
-            OBLOQ_ANSWER_CONTENT = item.substr(5, size - 2 - 5)//IP addr
-            return
-        } else if (item.indexOf("|2|4|", 0) != -1) {
-            OBLOQ_ANSWER_CMD = "WifiConnectFailure"
-            OBLOQ_ANSWER_CONTENT = OBLOQ_STR_TYPE_IS_NONE
-            return
-        } else if (item.indexOf("|3|", 0) != -1) {//|3|errcode|message|
-            let str = item.substr(3, size - 2 - 3)
-            let num = str.indexOf("|")
-            OBLOQ_ANSWER_CMD = str.substr(0, num)
-            OBLOQ_ANSWER_CONTENT = str.substr(num + 1, str.length - OBLOQ_ANSWER_CMD.length - 1)
-            return
-        } else {
-            return
-        }
-    }
-
-    function onEvent() {
-        if (!OBLOQ_SERIAL_INIT) {
-            Obloq_serial_init()
-        }
-        OBLOQ_MQTT_EVENT = OBLOQ_BOOL_TYPE_IS_TRUE
-        obloqEventOn()
-        control.onEvent(<number>32, <number>1, Obloq_serial_recevice); // register handler
-    }
-	//% weight=180
-    //% blockGap=60
-    //% blockId=obloq_mqtt_callback_user_more block="on %top |received"
-    //% top.fieldEditor="gridpicker" top.fieldOptions.columns=2
-    //% useLoc="Obloq.Obloq_mqtt_callback_user_more"
-    //% advanced=true
-    export function Obloq_mqtt_callback_user_more(top: TOPIC, cb: (message: string) => void) {
-        Obloq_mqtt_callback_more(top, () => {
+   /**
+     * This is an MQTT listener callback function, which is very important.
+     * The specific use method can refer to "example/ObloqMqtt.ts"
+    */
+    //% weight=100
+    //% blockGap=50
+    //% mutate=objectdestructuring
+    //% mutateText=PacketaMqtt
+    //% mutateDefaults="message:message"
+    //% blockId=obloq_mqtt_callback_user block="on topic_0 received"
+    export function Obloq_mqtt_callback_user(cb: (packet: PacketaMqtt) => void): void {
+        Obloq_mqtt_callback(() => {
             const packet = new PacketaMqtt()
+            packet.topic = OBLOQ_ANSWER_CMD
             packet.message = OBLOQ_ANSWER_CONTENT
-            cb(packet.message)
+            cb(packet)
         });
     }
 
+    /**
+     * This is an MQTT listener callback function, which is very important.
+     * The specific use method can refer to "example/ObloqMqtt.ts"
+    */
+    //% weight=180
+    //% blockGap=60
+    //% mutate=objectdestructuring
+    //% mutateText=PacketaMqtt
+    //% mutateDefaults="message:message"
+    //% blockId=obloq_mqtt_callback_user_more block="on %top |received"
+    //% top.fieldEditor="gridpicker" top.fieldOptions.columns=2
+    //% advanced=true
+    export function Obloq_mqtt_callback_user_more(top: TOPIC, cb: (packet: PacketaMqtt) => void) {
+        Obloq_mqtt_callback_more(top, () => {
+            const packet = new PacketaMqtt()
+            packet.topic = OBLOQ_ANSWER_CMD
+            packet.message = OBLOQ_ANSWER_CONTENT
+            cb(packet)
+        }); 
+    }
+
+
+    function Obloq_serial_recevice(): void {
+        let size = obloqRxBufferedSize()
+        //serial.writeNumber(size)
+        if (size <= 5) return
+        let item = obloqreadString(size)
+        //if (size > 10) {serial.writeString(item) }
+        for (let i = 0; i < size; i++) {
+            if (item.charAt(i) == '|') {
+                continue
+                /////////////////////////////////////System api////////////////////////////////////////
+            } else if (item.charAt(i) == '1') {
+                if (item.charAt(i + 1) == '|') {
+                    if (item.charAt(i + 2) == '1') { //|1|1|
+                        OBLOQ_ANSWER_CMD = "PingOk"
+                        OBLOQ_ANSWER_CONTENT = OBLOQ_STR_TYPE_IS_NONE
+                        return
+                    } else if (item.charAt(i + 2) == '2') { //|1|2|version|
+                        let z = 0
+                        let j = i + 4
+                        for (i = i + 4; i < size; i++) {
+                            if (item.charAt(i) == '|') {
+                                break;
+                            } else {
+                                z = z + 1
+                            }
+                        }
+                        OBLOQ_ANSWER_CMD = "GetVersion"
+                        OBLOQ_ANSWER_CONTENT = item.substr(j, z)//version
+                        return
+                    } else if (item.charAt(i + 2) == '3') { //|1|3|
+                        if (OBLOQ_MQTT_INIT) {
+                            OBLOQ_ANSWER_CMD = "Heartbeat"
+                            OBLOQ_ANSWER_CONTENT = "OK"
+                        }
+                        return
+                    }
+                }
+/////////////////////////////////////Wifi api////////////////////////////////////////
+            } else if (item.charAt(i) == '2') {
+                if (item.charAt(i + 1) == '|') {
+                    if (item.charAt(i + 2) == '1') { //|2|1|
+                        OBLOQ_ANSWER_CMD = "WifiDisconnect"
+                        OBLOQ_ANSWER_CONTENT = OBLOQ_STR_TYPE_IS_NONE
+                        if (OBLOQ_MQTT_INIT || OBLOQ_HTTP_INIT || OBLOQ_WIFI_CONNECTED) {
+                            OBLOQ_WRONG_TYPE = "wifi disconnect"
+                        }
+                        return
+                    } else if (item.charAt(i + 2) == '2') { //|2|2|
+                        OBLOQ_ANSWER_CMD = "WifiConnecting"
+                        OBLOQ_ANSWER_CONTENT = OBLOQ_STR_TYPE_IS_NONE
+                        return
+                    }else if (item.charAt(i + 2) == '3') { //|2|3|ip|
+                        let z = 0
+                        let j = i + 4
+                        for (i = i + 4; i < size; i++) {
+                            if (item.charAt(i) == '|') {
+                                break;
+                            } else {
+                                z = z + 1
+                            }
+                        }
+                        OBLOQ_ANSWER_CMD = "WifiConnected"
+                        OBLOQ_ANSWER_CONTENT = item.substr(j, z)//IP addr
+                        return
+                    } else if (item.charAt(i + 2) == '4') { //|2|4|
+                        OBLOQ_ANSWER_CMD = "WifiConnectFailure"
+                        OBLOQ_ANSWER_CONTENT = OBLOQ_STR_TYPE_IS_NONE
+                        return
+                    }
+                }
+/////////////////////////////////////Http api////////////////////////////////////////
+            } else if (item.charAt(i) == '3') {
+                if (item.charAt(i + 1) == '|') { //|3|errcode|message|
+                    let z = 0
+                    let j = i + 2
+                    for (i = i + 2; i < size; i++) {
+                        if (item.charAt(i) == '|') {
+                            break;
+                        } else {
+                            z = z + 1
+                        }
+                    }
+                    OBLOQ_ANSWER_CMD = item.substr(j, z)
+                    z = 0
+                    j = i + 1
+                    for (i = i + 1; i < size; i++) {
+                        if (item.charAt(i) == '|') {
+                            break;
+                        } else {
+                            z = z + 1
+                        }
+                    }
+                    OBLOQ_ANSWER_CONTENT = item.substr(j, z)
+                    return
+                }
+/////////////////////////////////////Mqtt api////////////////////////////////////////
+            } else if (item.charAt(i) == '4') { // serial.writeNumber(2);
+                if (item.charAt(i + 1) == '|') {
+                    if (item.charAt(i + 2) == '1') {   //|4|1|1|1|
+                        if (item.charAt(i + 3) == '|' &&
+                            item.charAt(i + 4) == '1' &&
+                            item.charAt(i + 5) == '|' &&
+                            item.charAt(i + 6) == '1' &&
+                            item.charAt(i + 7) == '|'
+                        ) {
+                            OBLOQ_ANSWER_CMD = "MqttConneted"
+                            OBLOQ_ANSWER_CONTENT = OBLOQ_STR_TYPE_IS_NONE
+                            return
+                        } else if (item.charAt(i + 3) == '|' &&
+                            item.charAt(i + 4) == '1' && //|4|1|1|2|reason|
+                            item.charAt(i + 5) == '|' &&
+                            item.charAt(i + 6) == '2' &&
+                            item.charAt(i + 7) == '|'
+                        ) { 
+                            OBLOQ_ANSWER_CMD = "MqttConnectFailure"
+                            let z = 0
+                            let j = i + 8
+                            for (i = i + 8; i < size; i++) {
+                                if (item.charAt(i) == '|') {
+                                    break;
+                                } else {
+                                    z = z + 1
+                                }
+                            }
+                            OBLOQ_ANSWER_CONTENT = item.substr(j, z)
+                            return
+                        } else if (item.charAt(i + 3) == '|' &&
+                            item.charAt(i + 4) == '2' && //|4|1|2|1|
+                            item.charAt(i + 5) == '|' &&
+                            item.charAt(i + 6) == '1' &&
+                            item.charAt(i + 7) == '|'
+                        ) {
+                            OBLOQ_ANSWER_CMD = "SubOk"
+                            OBLOQ_ANSWER_CONTENT = OBLOQ_STR_TYPE_IS_NONE
+                            return
+                        } else if (item.charAt(i + 3) == '|' &&
+                            item.charAt(i + 4) == '2' && //|4|1|2|2|1|
+                            item.charAt(i + 5) == '|' &&
+                            item.charAt(i + 6) == '2' &&
+                            item.charAt(i + 7) == '|' &&
+                            item.charAt(i + 8) == '1' &&
+                            item.charAt(i + 9) == '|'
+                        ) {
+                            OBLOQ_ANSWER_CMD = "SubCeiling"
+                            OBLOQ_ANSWER_CONTENT = OBLOQ_STR_TYPE_IS_NONE
+                            return
+                        } else if (item.charAt(i + 3) == '|' &&
+                            item.charAt(i + 4) == '2' && //|4|1|2|2|2|
+                            item.charAt(i + 5) == '|' &&
+                            item.charAt(i + 6) == '2' &&
+                            item.charAt(i + 7) == '|' &&
+                            item.charAt(i + 8) == '2' &&
+                            item.charAt(i + 9) == '|'
+                        ) {
+                            OBLOQ_ANSWER_CMD = "SubFailure"
+                            OBLOQ_ANSWER_CONTENT = OBLOQ_STR_TYPE_IS_NONE
+                            return
+                        } else if (item.charAt(i + 3) == '|' &&
+                            item.charAt(i + 4) == '3' && //|4|1|3|1|
+                            item.charAt(i + 5) == '|' &&
+                            item.charAt(i + 6) == '1' &&
+                            item.charAt(i + 7) == '|'
+                        ) {  //led.plot(0, 1)
+                            OBLOQ_ANSWER_CMD = "PulishOk"
+                            OBLOQ_ANSWER_CONTENT = OBLOQ_STR_TYPE_IS_NONE
+                            return
+                        } else if (item.charAt(i + 3) == '|' &&
+                            item.charAt(i + 4) == '3' && //|4|1|3|2|
+                            item.charAt(i + 5) == '|' &&
+                            item.charAt(i + 6) == '2' &&
+                            item.charAt(i + 7) == '|'
+                        ) {  //led.plot(0, 1)
+                            OBLOQ_ANSWER_CMD = "PulishFailure"
+                            OBLOQ_ANSWER_CONTENT = OBLOQ_STR_TYPE_IS_NONE
+                            OBLOQ_WRONG_TYPE = "mqtt pulish failure"
+                            return
+                        } else if (item.charAt(i + 3) == '|' &&
+                            item.charAt(i + 4) == '4' && //|4|1|4|1|
+                            item.charAt(i + 5) == '|' &&
+                            item.charAt(i + 6) == '1' &&
+                            item.charAt(i + 7) == '|'
+                        ) {
+                            OBLOQ_ANSWER_CMD = "MqttDisconnected"
+                            OBLOQ_ANSWER_CONTENT = OBLOQ_STR_TYPE_IS_NONE
+                            return
+                        } else if (item.charAt(i + 3) == '|' &&
+                            item.charAt(i + 4) == '4' && //|4|1|4|2|
+                            item.charAt(i + 5) == '|' &&
+                            item.charAt(i + 6) == '2' &&
+                            item.charAt(i + 7) == '|'
+                        ) {
+                            OBLOQ_ANSWER_CMD = "MqttDisconnectFailure"
+                            OBLOQ_ANSWER_CONTENT = OBLOQ_STR_TYPE_IS_NONE
+                            return
+                        } else if (item.charAt(i + 3) == '|' &&
+                            item.charAt(i + 4) == '5' && //|4|1|5|
+                            item.charAt(i + 5) == '|'
+                        ) {
+                            let z = 0
+                            let j = i + 6
+                            for (i = i + 6; i < size; i++) {
+                                if (item.charAt(i) == '|') {
+                                    break;
+                                } else {
+                                    z = z + 1
+                                }
+                            }
+                            OBLOQ_ANSWER_CMD = item.substr(j, z)
+                            z = 0
+                            j = i + 1
+                            for (i = i + 1; i < size; i++) {
+                                if (item.charAt(i) == '|') {
+                                    break;
+                                } else {
+                                    z = z + 1
+                                }
+                            }
+                            OBLOQ_ANSWER_CONTENT = item.substr(j, z)///?????????
+                            switch (OBLOQ_ANSWER_CMD) { 
+                                case OBLOQ_MQTT_TOPIC[0][0]: { if(OBLOQ_MQTT_CB[0] != null ) obloqforevers(OBLOQ_MQTT_CB[0]); } break;
+                                case OBLOQ_MQTT_TOPIC[1][0]: { if(OBLOQ_MQTT_CB[1] != null ) obloqforevers(OBLOQ_MQTT_CB[1]); } break;
+                                case OBLOQ_MQTT_TOPIC[2][0]: { if(OBLOQ_MQTT_CB[2] != null ) obloqforevers(OBLOQ_MQTT_CB[2]); } break;
+                                case OBLOQ_MQTT_TOPIC[3][0]: { if(OBLOQ_MQTT_CB[3] != null ) obloqforevers(OBLOQ_MQTT_CB[3]); } break;
+                                case OBLOQ_MQTT_TOPIC[4][0]: { if(OBLOQ_MQTT_CB[4] != null ) obloqforevers(OBLOQ_MQTT_CB[4]); } break;
+                            }
+                            break
+                        } else if (item.charAt(i + 3) == '|' &&
+                            item.charAt(i + 4) == '6' && //|4|1|6|1|
+                            item.charAt(i + 5) == '|' &&
+                            item.charAt(i + 6) == '1' &&
+                            item.charAt(i + 7) == '|'
+                        ) {
+                            OBLOQ_ANSWER_CMD = "UnSubOk"
+                            OBLOQ_ANSWER_CONTENT = OBLOQ_STR_TYPE_IS_NONE
+                            return
+                        } else if (item.charAt(i + 3) == '|' &&
+                            item.charAt(i + 4) == '6' && //|4|1|6|2|1|
+                            item.charAt(i + 5) == '|' &&
+                            item.charAt(i + 6) == '2' &&
+                            item.charAt(i + 7) == '|' &&
+                            item.charAt(i + 8) == '1' &&
+                            item.charAt(i + 9) == '|'
+                        ) {
+                            OBLOQ_ANSWER_CMD = "UnSubFailure"
+                            OBLOQ_ANSWER_CONTENT = OBLOQ_STR_TYPE_IS_NONE
+                            return
+                        } else if (item.charAt(i + 3) == '|' &&
+                            item.charAt(i + 4) == '6' && //|4|1|6|2|2|
+                            item.charAt(i + 5) == '|' &&
+                            item.charAt(i + 6) == '2' &&
+                            item.charAt(i + 7) == '|' &&
+                            item.charAt(i + 8) == '2' &&
+                            item.charAt(i + 9) == '|'
+                        ) {
+                            OBLOQ_ANSWER_CMD = "UnSubFailure"
+                            OBLOQ_ANSWER_CONTENT = OBLOQ_STR_TYPE_IS_NONE
+                            return
+                        }
+/////////////////////////////////////Azure api////////////////////////////////////////
+                    } else if (item.charAt(i + 2) == '2') {
+                        if (item.charAt(i + 3) == '|' &&  //|4|2|1|1|
+                            item.charAt(i + 4) == '1' &&
+                            item.charAt(i + 5) == '|' &&
+                            item.charAt(i + 6) == '1' &&
+                            item.charAt(i + 7) == '|'
+                        ) {
+                            OBLOQ_ANSWER_CMD = "AzureCredentialCreatOk"
+                            OBLOQ_ANSWER_CONTENT = OBLOQ_STR_TYPE_IS_NONE
+                            return
+                        } else if (item.charAt(i + 3) == '|' &&  //|4|2|1|2|reason|
+                            item.charAt(i + 4) == '1' &&
+                            item.charAt(i + 5) == '|' &&
+                            item.charAt(i + 6) == '2' &&
+                            item.charAt(i + 7) == '|'
+                        ) {
+                            OBLOQ_ANSWER_CMD = "AzureCredentialCreateFailure"
+                            let z = 0
+                            let j = i + 8
+                            for (i = i + 8; i < size; i++) {
+                                if (item.charAt(i) == '|') {
+                                    break;
+                                } else {
+                                    z = z + 1
+                                }
+                            }
+                            OBLOQ_ANSWER_CONTENT = item.substr(j, z)
+                            return
+                        } else if (item.charAt(i + 3) == '|' &&  //|4|2|2|1|
+                            item.charAt(i + 4) == '2' &&
+                            item.charAt(i + 5) == '|' &&
+                            item.charAt(i + 6) == '1' &&
+                            item.charAt(i + 7) == '|'
+                        ) {
+                            OBLOQ_ANSWER_CMD = "AzureListenOk"
+                            OBLOQ_ANSWER_CONTENT = OBLOQ_STR_TYPE_IS_NONE
+                            return
+                        } else if (item.charAt(i + 3) == '|' &&  //|4|2|3|1|
+                            item.charAt(i + 4) == '3' &&
+                            item.charAt(i + 5) == '|' &&
+                            item.charAt(i + 6) == '1' &&
+                            item.charAt(i + 7) == '|'
+                        ) {
+                            OBLOQ_ANSWER_CMD = "AzureSendOk"
+                            OBLOQ_ANSWER_CONTENT = OBLOQ_STR_TYPE_IS_NONE
+                            return
+                        } else if (item.charAt(i + 3) == '|' &&  //|4|2|3|2|
+                            item.charAt(i + 4) == '3' &&
+                            item.charAt(i + 5) == '|' &&
+                            item.charAt(i + 6) == '2' &&
+                            item.charAt(i + 7) == '|'
+                        ) {
+                            OBLOQ_ANSWER_CMD = OBLOQ_STR_TYPE_IS_NONE
+                            OBLOQ_ANSWER_CONTENT = "AzureSendFailure"
+                            return
+                        } else if (item.charAt(i + 3) == '|' &&  //|4|2|4|1|
+                            item.charAt(i + 4) == '4' &&
+                            item.charAt(i + 5) == '|' &&
+                            item.charAt(i + 6) == '1' &&
+                            item.charAt(i + 7) == '|'
+                        ) {
+                            OBLOQ_ANSWER_CMD = "AzureDestructionOk"
+                            OBLOQ_ANSWER_CONTENT = OBLOQ_STR_TYPE_IS_NONE
+                            return
+                        } else if (item.charAt(i + 3) == '|' &&  //|4|2|4|2|
+                            item.charAt(i + 4) == '4' &&
+                            item.charAt(i + 5) == '|' &&
+                            item.charAt(i + 6) == '2' &&
+                            item.charAt(i + 7) == '|'
+                        ) {
+                            OBLOQ_ANSWER_CMD = "AzureDestructionFailure"
+                            OBLOQ_ANSWER_CONTENT = OBLOQ_STR_TYPE_IS_NONE
+                            return
+                        } else if (item.charAt(i + 3) == '|' &&  //|4|2|5|message|
+                            item.charAt(i + 4) == '5' &&
+                            item.charAt(i + 5) == '|' 
+                        ) {
+                            OBLOQ_ANSWER_CMD = "AzureReceiveOk"
+                            let z = 0
+                            let j = i + 6
+                            for (i = i + 6; i < size; i++) {
+                                if (item.charAt(i) == '|') {
+                                    break;
+                                } else {
+                                    z = z + 1
+                                }
+                            }
+                            OBLOQ_ANSWER_CONTENT = item.substr(j, z)
+                            return
+                        } else if (item.charAt(i + 3) == '|' &&  //|4|2|6|1|
+                            item.charAt(i + 4) == '6' &&
+                            item.charAt(i + 5) == '|' &&
+                            item.charAt(i + 6) == '1' &&
+                            item.charAt(i + 7) == '|'
+                        ) {
+                            OBLOQ_ANSWER_CMD = "AzureUnSubOk"
+                            OBLOQ_ANSWER_CONTENT = OBLOQ_STR_TYPE_IS_NONE
+                            return
+                        }
+                    }
+                }
+            } else if (item.charAt(i) == 't') {
+                if (item.charAt(i + 1) == 'i' &&
+                    item.charAt(i + 2) == 'm' &&
+                    item.charAt(i + 3) == 'e' &&
+                    item.charAt(i + 4) == 'o' &&
+                    item.charAt(i + 5) == 'u' &&
+                    item.charAt(i + 6) == 't'
+                ) {
+                    OBLOQ_ANSWER_CMD = "timeout"
+                    OBLOQ_ANSWER_CONTENT = OBLOQ_STR_TYPE_IS_NONE
+                    return
+                }
+            }
+        }
+        //serial.writeNumber(n);
+        //serial.writeString("\r\n");
+    }
+
+    function onEvent() {
+        if (!OBLOQ_SERIAL_INIT) { 
+            Obloq_serial_init()
+        }
+        OBLOQ_MQTT_EVENT = OBLOQ_BOOL_TYPE_IS_TRUE
+        //obloqClearRxBuffer()
+        //obloqClearTxBuffer()
+        //obloqEventAfter(1)
+        obloqEventOn("\r")
+        control.onEvent(<number>32, <number>1, Obloq_serial_recevice); // register handler
+    }
 
 
 	
