@@ -417,7 +417,142 @@ namespace Obloq_http {
 
          basic.showIcon(IconNames.Yes)
        
+
    }
+    function Obloq_serial_recevice(): void {
+
+        let Obloq_message_str = serial.readString()
+        let size = Obloq_message_str.length
+        let item = Obloq_message_str
+
+        if (item.indexOf("|4|1|1|1|", 0) != -1) {
+            OBLOQ_ANSWER_CMD = "MqttConneted"
+            OBLOQ_ANSWER_CONTENT = OBLOQ_STR_TYPE_IS_NONE
+            return
+        } else if (item.indexOf("|4|1|1|2|", 0) != -1) {
+            OBLOQ_ANSWER_CMD = "MqttConnectFailure"
+            OBLOQ_ANSWER_CONTENT = item.substr(9, size - 2 - 9)
+            return
+        } else if (item.indexOf("|4|1|2|1|", 0) != -1) {
+            OBLOQ_ANSWER_CMD = "SubOk"
+            OBLOQ_ANSWER_CONTENT = OBLOQ_STR_TYPE_IS_NONE
+            return
+        } else if (item.indexOf("|4|1|2|2|1|", 0) != -1) {
+            OBLOQ_ANSWER_CMD = "SubCeiling"
+            OBLOQ_ANSWER_CONTENT = OBLOQ_STR_TYPE_IS_NONE
+            return
+        } else if (item.indexOf("|4|1|2|2|2|", 0) != -1) {
+            OBLOQ_ANSWER_CMD = "SubFailure"
+            OBLOQ_ANSWER_CONTENT = OBLOQ_STR_TYPE_IS_NONE
+            return
+        } else if (item.indexOf("|4|1|3|1|", 0) != -1) {
+            OBLOQ_ANSWER_CMD = "PulishOk"
+            OBLOQ_ANSWER_CONTENT = OBLOQ_STR_TYPE_IS_NONE
+            return
+        } else if (item.indexOf("|4|1|3|2|", 0) != -1) {
+            OBLOQ_ANSWER_CMD = "PulishFailure"
+            OBLOQ_ANSWER_CONTENT = OBLOQ_STR_TYPE_IS_NONE
+            OBLOQ_WRONG_TYPE = "mqtt pulish failure"
+            return
+        } else if (item.indexOf("|4|1|4|1|", 0) != -1) {
+            OBLOQ_ANSWER_CMD = "MqttDisconnected"
+            OBLOQ_ANSWER_CONTENT = OBLOQ_STR_TYPE_IS_NONE
+            return
+        } else if (item.indexOf("|4|1|4|2|", 0) != -1) {
+            OBLOQ_ANSWER_CMD = "MqttDisconnectFailure"
+            OBLOQ_ANSWER_CONTENT = OBLOQ_STR_TYPE_IS_NONE
+            return
+        } else if (item.indexOf("|4|1|5|") != -1) {//|4|1|5|topic|message|
+            let str = item.substr(7, size - 2 - 7)
+            let num = str.indexOf("|")
+            OBLOQ_ANSWER_CMD = str.substr(0, num)
+            OBLOQ_ANSWER_CONTENT = str.substr(num + 1, str.length - OBLOQ_ANSWER_CMD.length - 1)
+            switch (OBLOQ_ANSWER_CMD) {
+                case OBLOQ_MQTT_TOPIC[0][0]: { if (OBLOQ_MQTT_CB[0] != null) obloqforevers(OBLOQ_MQTT_CB[0]); } break;
+                case OBLOQ_MQTT_TOPIC[1][0]: { if (OBLOQ_MQTT_CB[1] != null) obloqforevers(OBLOQ_MQTT_CB[1]); } break;
+                case OBLOQ_MQTT_TOPIC[2][0]: { if (OBLOQ_MQTT_CB[2] != null) obloqforevers(OBLOQ_MQTT_CB[2]); } break;
+                case OBLOQ_MQTT_TOPIC[3][0]: { if (OBLOQ_MQTT_CB[3] != null) obloqforevers(OBLOQ_MQTT_CB[3]); } break;
+                case OBLOQ_MQTT_TOPIC[4][0]: { if (OBLOQ_MQTT_CB[4] != null) obloqforevers(OBLOQ_MQTT_CB[4]); } break;
+            }
+            return
+        } else if (item.indexOf("|4|1|6|1|", 0) != -1) {
+            OBLOQ_ANSWER_CMD = "UnSubOk"
+            OBLOQ_ANSWER_CONTENT = OBLOQ_STR_TYPE_IS_NONE
+            return
+        } else if (item.indexOf("|4|1|6|2|1|", 0) != -1) {
+            OBLOQ_ANSWER_CMD = "UnSubFailure"
+            OBLOQ_ANSWER_CONTENT = OBLOQ_STR_TYPE_IS_NONE
+            return
+        } else if (item.indexOf("|4|1|6|2|2|", 0) != -1) {
+            OBLOQ_ANSWER_CMD = "UnSubFailure"
+            OBLOQ_ANSWER_CONTENT = OBLOQ_STR_TYPE_IS_NONE
+            return
+        } else if (item.indexOf("|1|1|", 0) != -1) {
+            OBLOQ_ANSWER_CMD = "PingOk"
+            OBLOQ_ANSWER_CONTENT = OBLOQ_STR_TYPE_IS_NONE
+            return
+        } else if (item.indexOf("|1|2|", 0) != -1) {
+            OBLOQ_ANSWER_CMD = "GetVersion"
+            OBLOQ_ANSWER_CONTENT = item.substr(5, size - 2 - 5)//version
+            return
+        } else if (item.indexOf("|1|3|", 0) != -1) {
+            if (OBLOQ_MQTT_INIT) {
+                OBLOQ_ANSWER_CMD = "Heartbeat"
+                OBLOQ_ANSWER_CONTENT = "OK"
+            }
+            return
+        } else if (item.indexOf("|2|1|", 0) != -1) {
+            OBLOQ_ANSWER_CMD = "WifiDisconnect"
+            OBLOQ_ANSWER_CONTENT = OBLOQ_STR_TYPE_IS_NONE
+            if (OBLOQ_MQTT_INIT || OBLOQ_HTTP_INIT || OBLOQ_WIFI_CONNECTED) {
+                OBLOQ_WRONG_TYPE = "wifi disconnect"
+            }
+            return
+        } else if (item.indexOf("|2|2|", 0) != -1) {
+            OBLOQ_ANSWER_CMD = "WifiConnecting"
+            OBLOQ_ANSWER_CONTENT = OBLOQ_STR_TYPE_IS_NONE
+            return
+        } else if (item.indexOf("|2|3|", 0) != -1) {
+            OBLOQ_ANSWER_CMD = "WifiConnected"
+            OBLOQ_ANSWER_CONTENT = item.substr(5, size - 2 - 5)//IP addr
+            return
+        } else if (item.indexOf("|2|4|", 0) != -1) {
+            OBLOQ_ANSWER_CMD = "WifiConnectFailure"
+            OBLOQ_ANSWER_CONTENT = OBLOQ_STR_TYPE_IS_NONE
+            return
+        } else if (item.indexOf("|3|", 0) != -1) {//|3|errcode|message|
+            let str = item.substr(3, size - 2 - 3)
+            let num = str.indexOf("|")
+            OBLOQ_ANSWER_CMD = str.substr(0, num)
+            OBLOQ_ANSWER_CONTENT = str.substr(num + 1, str.length - OBLOQ_ANSWER_CMD.length - 1)
+            return
+        } else {
+            return
+        }
+    }
+
+    function onEvent() {
+        if (!OBLOQ_SERIAL_INIT) {
+            Obloq_serial_init()
+        }
+        OBLOQ_MQTT_EVENT = OBLOQ_BOOL_TYPE_IS_TRUE
+        obloqEventOn()
+        control.onEvent(<number>32, <number>1, Obloq_serial_recevice); // register handler
+    }
+	//% weight=180
+    //% blockGap=60
+    //% blockId=obloq_mqtt_callback_user_more block="on %top |received"
+    //% top.fieldEditor="gridpicker" top.fieldOptions.columns=2
+    //% useLoc="Obloq.Obloq_mqtt_callback_user_more"
+    //% advanced=true
+    export function Obloq_mqtt_callback_user_more(top: TOPIC, cb: (message: string) => void) {
+        Obloq_mqtt_callback_more(top, () => {
+            const packet = new PacketaMqtt()
+            packet.message = OBLOQ_ANSWER_CONTENT
+            cb(packet.message)
+        });
+    }
+
 
 
 	
